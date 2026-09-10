@@ -43,10 +43,8 @@ if img_file_buffer is not None:
 
     st.header(f'Detectado: {clase_detectada}, con Probabilidad: {probabilidad}')
 
-    # Verificar si la clase detectada es "Paz"
-    if clase_detectada.lower() == "paz" and probabilidad > 0.5:
-        st.success("Hay paz")
+    # Verificar si la clase detectada es "samuel"
+    if clase_detectada.lower() == "samuel" and probabilidad > 0.5:
+        st.success("Esta samuel")
     else:
-        st.error("No hay paz")
-        
-
+        st.error("No esta samuel")
