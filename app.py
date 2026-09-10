@@ -1,20 +1,21 @@
 import streamlit as st
 import cv2
 import numpy as np
-#from PIL import Image
 from PIL import Image as Image, ImageOps as ImagOps
 from keras.models import load_model
 
 import platform
 
-# Muestra la versión de Python junto con detalles adicionales
 st.write("Versión de Python:", platform.python_version())
 
 model = load_model('keras_model.h5')
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
+# Cargar los nombres de las clases desde labels.txt
+with open('labels.txt', 'r') as f:
+    class_names = [line.strip().split(' ', 1)[1] if ' ' in line else line.strip() for line in f.readlines()]
+
 st.title("Reconocimiento de Imágenes")
-#st.write("Versión de Python:", platform.python_version())
 image = Image.open('OIG5.jpg')
 st.image(image, width=350)
 with st.sidebar:
@@ -22,29 +23,30 @@ with st.sidebar:
 img_file_buffer = st.camera_input("Toma una Foto")
 
 if img_file_buffer is not None:
-    # To read image file buffer with OpenCV:
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-   #To read image file buffer as a PIL Image:
     img = Image.open(img_file_buffer)
 
     newsize = (224, 224)
     img = img.resize(newsize)
-    # To convert PIL Image to numpy array:
     img_array = np.array(img)
 
-    # Normalize the image
     normalized_image_array = (img_array.astype(np.float32) / 127.0) - 1
-    # Load the image into the array
     data[0] = normalized_image_array
 
-    # run the inference
     prediction = model.predict(data)
     print(prediction)
-    if prediction[0][0]>0.5:
-      st.header('Izquierda, con Probabilidad: '+str( prediction[0][0]) )
-    if prediction[0][1]>0.5:
-      st.header('Arriba, con Probabilidad: '+str( prediction[0][1]))
-    #if prediction[0][2]>0.5:
-    # st.header('Derecha, con Probabilidad: '+str( prediction[0][2]))
 
+    # Índice de la clase con mayor probabilidad
+    idx = np.argmax(prediction[0])
+    clase_detectada = class_names[idx]
+    probabilidad = prediction[0][idx]
+
+    st.header(f'Detectado: {clase_detectada}, con Probabilidad: {probabilidad}')
+
+    # Verificar si la clase detectada es "Paz"
+    if clase_detectada.lower() == "paz" and probabilidad > 0.5:
+        st.success("Hay paz")
+    else:
+        st.error("No hay paz")
+        
 
